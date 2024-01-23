@@ -248,3 +248,79 @@ from quanlivattu.chi_tiet_phieu_xuat cx join quanlivattu.vat_tu vt on cx.id_vat_
 join quanlivattu.phieu_xuat px on cx.id_phieu_xuat = px.id;
 
 select * from vw_CTPXUAT_VT_PX;
+
+-- Câu 10. Tạo Stored procedure (SP) cho biết tổng số lượng cuối của vật tư với mã vật tư là tham số vào.
+
+DELIMITER //
+create procedure getTotalFinal
+(in ma_vt varchar(255))
+begin
+select ma_vat_tu, (tong_luong_dau + tong_so_luong_nhap - tong_so_luong_xuat) as 'tổng số lượng cuối'
+from quanlivattu.vat_tu vt join quanlivattu.ton_kho tk on vt.id = tk.id_vat_tu
+where vt.ma_vat_tu = ma_VT;
+end //
+DELIMITER //
+
+call getTotalFinal('s1');
+
+-- Câu 2. Tạo SP cho biết tổng tiền xuất của vật tư với mã vật tư là tham số vào, out là tổng tiền xuất
+
+DELIMITER //
+create procedure getPriceOut
+(in ma_vt varchar(255))
+begin
+select ma_vat_tu, (tong_so_luong_xuat * gia_tien) as 'tổng tiền xuất'
+from quanlivattu.vat_tu vt join quanlivattu.ton_kho tk on vt.id = tk.id_vat_tu
+where vt.ma_vat_tu = ma_VT;
+end //
+DELIMITER //
+
+call getPriceOut('s2');
+
+-- Câu 3. Tạo SP cho biết tổng số lượng đặt theo số đơn hàng với số đơn hàng là tham số vào.
+
+DELIMITER //
+create procedure getQuantity
+(in madon varchar(255))
+begin
+select ma_don, so_luong_dat 
+from quanlivattu.don_dat_hang ddh join quanlivattu.chi_tiet_don_hang dh on ddh.id = dh.id_don_hang
+where ddh.ma_don = madon;
+end //
+DELIMITER //
+
+call getQuantity('h1');
+
+-- Câu 4. Tạo SP dùng để thêm một đơn đặt hàng.
+
+DELIMITER //
+create procedure addNewOrder(
+ma_don varchar(255),
+ngay_dat_hang date,
+id_nha_cung_cap int
+)
+begin
+insert into quanlivattu.don_dat_hang(ma_don, ngay_dat_hang, id_nha_cung_cap) value
+(ma_don, ngay_dat_hang, id_nha_cung_cap);
+end//
+DELIMITER //
+
+call addNewOrder('h4', '2024-01-23', 1);
+select * from quanlivattu.don_dat_hang;
+
+-- Câu 5. Tạo SP dùng để thêm một chi tiết đơn đặt hàng.
+
+DELIMITER //
+create procedure addNew(
+id_don_hang int,
+id_vat_tu int,
+so_luong_dat int
+)
+begin
+insert into quanlivattu.chi_tiet_don_hang(id_don_hang, id_vat_tu, so_luong_dat) value
+(id_don_hang, id_vat_tu, so_luong_dat);
+end //
+DELIMITER //
+
+call addNew(1, 1, 15);
+select * from quanlivattu.chi_tiet_don_hang;
